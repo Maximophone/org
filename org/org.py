@@ -28,7 +28,7 @@ def _grow(node,d):
 			_grow(new_node,element)
 	if d.get('subs'):
 		for sub,subd in d.get('subs').iteritems():
-			new_node = node.meta._addsub(sub)
+			new_node = node.meta._add(sub)
 			_grow(new_node,subd)
 
 def _create():
@@ -61,7 +61,7 @@ class Meta(object):
 	def _process_string(self,s):
 		return s.replace(' ','').replace('_','').lower()
 
-	def _addsub(self,sub,params={},node=None,**kwargs):
+	def _add(self,sub,params={},node=None,**kwargs):
 		if node is None: node = OrgNode(params,parent=self._node,path=self._node._path+[sub],**kwargs)
 		setattr(self._node,sub,node)
 		self._node._subs[sub] = node
@@ -69,13 +69,12 @@ class Meta(object):
 		return node
 
 	@saver
-	def addsub(self,sub,params={},**kwargs):
-		return self._addsub(sub,params,**kwargs)
+	def add(self,sub,params={},**kwargs):
+		return self._add(sub,params,**kwargs)
 
 class OrgNode(object):
 	def __init__(self,content=None,params={},parent=None,path=[],**kwargs):
 		self.meta = Meta(self)
-		self.goto = _GOTO
 		self._params = params.copy()
 		self._params.update(kwargs)
 		self._elements = []
@@ -138,6 +137,10 @@ class OrgNode(object):
 		return str(self)
 
 class RootNode(OrgNode):
+	def __init__(self):
+		self.goto = _GOTO
+		super(RootNode,self).__init__()
+
 	def search(self,text):
 		return self._search(text)
 
